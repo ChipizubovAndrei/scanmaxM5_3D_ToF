@@ -1,0 +1,5 @@
+/bin
+/build
+/FaceDetector
+CMakeLists.txt.user
+FaceKeyPointDetector.h
