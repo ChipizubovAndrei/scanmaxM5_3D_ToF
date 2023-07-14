@@ -2,5 +2,4 @@
 /build
 /FaceDetector
 CMakeLists.txt.user
-FaceKeyPointDetector.h
 README.md
