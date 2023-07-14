@@ -291,15 +291,13 @@ public:
         openni::DepthPixel* dData = (openni::DepthPixel*)depthFrame.getData();
         memcpy(localFrame.data, dData, depthFrame.getStrideInBytes() * depthFrame.getHeight());
 
-        int kNorm = 30;
-        float maxVal = floor(1500.0 / kNorm);
-        cv::Vec3b color1 = cv::Vec3b(0, 0, 0);    // Цвет для наиболее удаленных объектов
+        float maxVal = floor(4000.0);
+        cv::Vec3b color1 = cv::Vec3b(255, 0, 0);    // Цвет для наиболее удаленных объектов
         cv::Vec3b color2 = cv::Vec3b(0, 0, 255);    // Цвет для наиболее близких объектов
         for( int y = 0; y < frame.rows; y++ ) {
             for( int x = 0; x < frame.cols; x++ ) {
                 uint16_t dist = (uint16_t)localFrame.at<uint16_t>(y,x);
-                dist = (uint16_t)(floor(dist / kNorm));
-                if (dist == 0 || dist > 1500){
+                if (dist == 0){
                     frame.at<cv::Vec3b>(y, x) = cv::Vec3b(0, 0, 0);
                 }
                 else{
