@@ -19,11 +19,12 @@ int main() {
     using std::chrono::milliseconds;
 
     OpenNIOpenCV::OpenNI2OpenCV oni;
-    FaceKeyPointDetectorLBF lbf;
-    YuNetDetector net;
-    HaarCascaadDetector haar;
+//    FaceKPDetector::FaceKeyPointDetectorLBF lbf;
+//    FaceBBDetector::YuNetDetector net;
+    FaceKPDetector::YuNetDetector KPnet;
 
     std::vector<cv::Rect2i> boxes;
+    std::vector <std::vector <cv::Point2i>> landmarks;
     if (oni.init() != openni::STATUS_OK){
         printf("Initializatuion failed");
         return 1;
@@ -36,8 +37,10 @@ int main() {
 //        oni.getDepthFrame(depthFrame);
 //        oni.getIrFrame(irFrame);
         oni.getColorFrame(colorFrame);
-        boxes = net.predict(colorFrame);
-        lbf.predict(colorFrame, boxes);
+//        boxes = net.predict(colorFrame);
+//        lbf.predict(colorFrame, boxes);
+        landmarks = KPnet.predict(colorFrame);
+//        KPnet.drawLandmarks(colorFrame, landmarks);
 
         auto t2 = high_resolution_clock::now();
         duration<double, std::milli> ms_double = (t2 - t1);
@@ -56,7 +59,7 @@ int main() {
 //           cv::imshow("IR", irFrame);
             cv::imshow("Color", colorFrame);
         }
-        if (cv::waitKey(10) == 27)   break;
+        if (cv::waitKey(10) == 27) break;
 
     }
 

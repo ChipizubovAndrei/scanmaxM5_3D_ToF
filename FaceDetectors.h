@@ -9,6 +9,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
 
+// Face Bounding Box Detector
+namespace FaceBBDetector{
 /*
     Модель на основе каскадов Хаара для детекции лица на изображении
 */
@@ -86,7 +88,6 @@ public:
 
         m_detector->detect(image, faces);
         if (faces.rows >= 1){
-//            std::vector<cv::Rect2i> boxes;
             for (int i = 0; i < faces.rows; i++){
                 // Формирование массива с координатами bounding boxes
                 boxes.push_back(cv::Rect2i(int(faces.at<float>(i, 0)), int(faces.at<float>(i, 1)),
@@ -110,5 +111,7 @@ public:
     }
 
 };
+
+}
 
 #endif // FACEDETECTORS_H
