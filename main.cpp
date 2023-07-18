@@ -11,6 +11,8 @@
 #include "FaceKeyPointDetector.h"
 #include "FaceDetectors.h"
 
+#include "Utils.h"
+
 
 int main() {
     using std::chrono::high_resolution_clock;
@@ -19,12 +21,13 @@ int main() {
     using std::chrono::milliseconds;
 
     OpenNIOpenCV::OpenNI2OpenCV oni;
-//    FaceKPDetector::FaceKeyPointDetectorLBF lbf;
-//    FaceBBDetector::YuNetDetector net;
-    FaceKPDetector::YuNetDetector KPnet;
+
+    FaceBBDetector::YuNetDetector BBdetector;
+    FaceKPDetector::DlibDetector KPdetector;
 
     std::vector<cv::Rect2i> boxes;
     std::vector <std::vector <cv::Point2i>> landmarks;
+
     if (oni.init() != openni::STATUS_OK){
         printf("Initializatuion failed");
         return 1;
@@ -37,11 +40,12 @@ int main() {
 //        oni.getDepthFrame(depthFrame);
 //        oni.getIrFrame(irFrame);
         oni.getColorFrame(colorFrame);
-//        boxes = net.predict(colorFrame);
-//        lbf.predict(colorFrame, boxes);
-        landmarks = KPnet.predict(colorFrame);
-//        KPnet.drawLandmarks(colorFrame, landmarks);
+        boxes = BBdetector.predict(colorFrame);
+        landmarks = KPdetector.predict(colorFrame, boxes);
 
+        drawLandmarks(colorFrame, landmarks);
+
+        // Вычисление количество FPS
         auto t2 = high_resolution_clock::now();
         duration<double, std::milli> ms_double = (t2 - t1);
         if (ms_double.count() > 1000.0){

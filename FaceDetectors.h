@@ -97,19 +97,6 @@ public:
         return boxes;
     }
 
-    /*
-        Функция для оттображения ограничивающих рамок
-        Аргументы:
-            - image - изображение
-            - boxes - массив с координатами bounding boxes
-    */
-    void drawBoundingBox(cv::Mat& image, std::vector<cv::Rect2i> boxes){
-        for (int i = 0; i < boxes.size(); i++){
-            // Отображение bounding boxes
-            cv::rectangle(image, boxes[i], cv::Scalar(0, 255, 0), 2);
-        }
-    }
-
 };
 
 }

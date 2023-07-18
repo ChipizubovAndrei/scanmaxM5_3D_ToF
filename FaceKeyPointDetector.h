@@ -9,6 +9,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
 
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/opencv.h>
+
+#include "Utils.h"
+
 
 // Face Key Point Detector
 namespace FaceKPDetector{
@@ -41,7 +46,7 @@ public:
             - boxes - массив с координатами bounding boxes полученных
             с детектора лиц
     */
-    void predict(cv::Mat& image, std::vector<cv::Rect2i> boxes)
+    std::vector< std::vector<cv::Point2f> > predict(cv::Mat& image, std::vector<cv::Rect2i> boxes)
     {
         // Variable for landmarks.
         // Landmarks for one face is a vector of points
@@ -52,13 +57,14 @@ public:
         // Run landmark detector
         bool success = m_facemark->fit(image, boxes, landmarks);
 
-        if(success){
-            // If successful, render the landmarks on the face
-            for(int i = 0; i < landmarks.size(); i++){
-//                cv::rectangle(image, boxes[i], cv::Scalar(255, 0, 0));
-                cv::face::drawFacemarks(image, landmarks[i], cv::Scalar(0, 255, 0));
-            }
-        }
+//        if(success){
+//            // If successful, render the landmarks on the face
+//            for(int i = 0; i < landmarks.size(); i++){
+////                cv::rectangle(image, boxes[i], cv::Scalar(255, 0, 0));
+//                cv::face::drawFacemarks(image, landmarks[i], cv::Scalar(0, 255, 0));
+//            }
+//        }
+        return landmarks;
     }
 };
 
@@ -117,25 +123,40 @@ public:
         return landmarks;
     }
 
-    /*
-        Функция для оттображения ограничивающих рамок
-        Аргументы:
-            - image - изображение
-            - boxes - массив с координатами bounding boxes
-    */
-    void drawLandmarks(cv::Mat& image, std::vector< std::vector<cv::Point2i>> landmarks){
-        for (int i = 0; i < landmarks.size(); i++){
-            // Отображение ключевых точек
-            if (!landmarks.empty()){
-                cv::circle(image, landmarks[i][0], 2, cv::Scalar(255, 0, 0),    2);
-                cv::circle(image, landmarks[i][1], 2, cv::Scalar(0, 255, 0),    2);
-                cv::circle(image, landmarks[i][2], 2, cv::Scalar(0, 0, 255),    2);
-                cv::circle(image, landmarks[i][3], 2, cv::Scalar(255, 255, 0),  2);
-                cv::circle(image, landmarks[i][4], 2, cv::Scalar(0, 255, 255),  2);
-            }
-        }
+};
+
+class DlibDetector
+{
+private:
+    dlib::shape_predictor m_sp;
+
+public:
+
+    DlibDetector(){
+        dlib::deserialize("shape_predictor_68_face_landmarks.dat") >> m_sp;
     }
 
+    ~DlibDetector(){}
+
+    std::vector< std::vector <cv::Point2i>> predict(cv::Mat& image, std::vector<cv::Rect2i> boxes)
+    {
+        dlib::cv_image<dlib::rgb_pixel> dImage(image);
+        std::vector<dlib::rectangle> dBoxes(boxes.size());
+        for (int i = 0; i < boxes.size(); i++){
+            dBoxes[i] = openCVRectToDlib(boxes[i]);
+        }
+        std::vector <std::vector <cv::Point2i>> landmarks(dBoxes.size());
+        for (unsigned int i = 0; i < dBoxes.size(); i++){
+            dlib::full_object_detection shape = m_sp(dImage, dBoxes[i]);
+            std::vector<cv::Point2i> currLandmarks;
+            for (int j = 0; j < shape.num_parts(); j++){
+                currLandmarks.push_back(cv::Point(int(shape.part(j).x()),
+                                                  int(shape.part(j).y())));
+            }
+            landmarks[i] = currLandmarks;
+        }
+        return landmarks;
+    }
 };
 }
 
